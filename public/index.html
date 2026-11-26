@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Student Management System | B.Tech FSD Assignment 1</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="container topbar-inner">
+      <div class="brand">
+        <div class="brand-icon" aria-hidden="true">SMS</div>
+        <div>
+          <h1>Student Management System</h1>
+          <p class="subtitle">B.Tech Full Stack Development &bull; Assignment 1</p>
+        </div>
+      </div>
+
+      <div class="stat-pill" aria-live="polite">
+        <span class="stat-label">Total Students</span>
+        <span id="totalStudentsCount" class="stat-value">0</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="container main-content">
+    <!-- Success / Error Message Banner -->
+    <div id="alertBox" class="alert hidden" role="alert">
+      <span id="alertMessage"></span>
+      <button type="button" id="closeAlertBtn" class="alert-close" aria-label="Dismiss message">&times;</button>
+    </div>
+
+    <div class="dashboard-grid">
+      <!-- Left Column: Add / Edit Student Form -->
+      <section class="card form-card" aria-labelledby="formHeading">
+        <div class="card-header">
+          <h2 id="formHeading">Add New Student</h2>
+          <span id="formModeBadge" class="badge badge-blue">Create Mode</span>
+        </div>
+
+        <form id="studentForm" novalidate>
+          <input type="hidden" id="studentId" />
+
+          <div class="form-group">
+            <label for="name">Full Name <span class="required">*</span></label>
+            <input
+              type="text"
+              id="name"
+              name="name"
+              placeholder="e.g., Aarav Sharma"
+              required
+              minlength="2"
+              maxlength="100"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="enrollmentNumber">Enrollment Number <span class="required">*</span></label>
+            <input
+              type="text"
+              id="enrollmentNumber"
+              name="enrollmentNumber"
+              placeholder="e.g., BT24CSE001"
+              required
+              minlength="3"
+              maxlength="30"
+              autocomplete="off"
+            />
+            <small class="hint">Letters, numbers, and hyphens only (must be unique).</small>
+          </div>
+
+          <div class="form-group">
+            <label for="email">Email Address <span class="required">*</span></label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              placeholder="e.g., aarav.sharma@college.edu"
+              required
+            />
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="branch">Branch <span class="required">*</span></label>
+              <select id="branch" name="branch" required>
+                <option value="">Select Branch</option>
+                <option value="CSE">CSE</option>
+                <option value="IT">IT</option>
+                <option value="AI &amp; DS">AI &amp; DS</option>
+                <option value="ECE">ECE</option>
+                <option value="EE">EE</option>
+                <option value="ME">ME</option>
+                <option value="CE">CE</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="semester">Semester <span class="required">*</span></label>
+              <select id="semester" name="semester" required>
+                <option value="">Select</option>
+                <option value="1">Semester 1</option>
+                <option value="2">Semester 2</option>
+                <option value="3">Semester 3</option>
+                <option value="4">Semester 4</option>
+                <option value="5">Semester 5</option>
+                <option value="6">Semester 6</option>
+                <option value="7">Semester 7</option>
+                <option value="8">Semester 8</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="section">Section <span class="required">*</span></label>
+              <select id="section" name="section" required>
+                <option value="">Select</option>
+                <option value="A">A</option>
+                <option value="B">B</option>
+                <option value="C">C</option>
+                <option value="D">D</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" id="submitBtn" class="btn btn-primary">Add Student</button>
+            <button type="button" id="cancelEditBtn" class="btn btn-secondary hidden">Cancel Edit</button>
+            <button type="button" id="resetBtn" class="btn btn-ghost">Clear</button>
+          </div>
+        </form>
+      </section>
+
+      <!-- Right Column: Student Directory Table -->
+      <section class="card table-card" aria-labelledby="recordsHeading">
+        <div class="card-header table-header">
+          <div>
+            <h2 id="recordsHeading">Student Records</h2>
+            <p id="recordsSubtitle" class="records-subtitle">Showing 0 students</p>
+          </div>
+
+          <div class="search-box">
+            <input
+              type="search"
+              id="searchInput"
+              placeholder="Search by name or enrollment no..."
+              aria-label="Search students by name or enrollment number"
+            />
+            <button type="button" id="clearSearchBtn" class="btn btn-secondary btn-sm hidden">Clear</button>
+          </div>
+        </div>
+
+        <div id="loadingState" class="state-box hidden">Loading student records...</div>
+
+        <div id="emptyState" class="state-box hidden">
+          <p class="empty-title">No student records found</p>
+          <p class="empty-desc">Add a new student using the form or adjust your search query.</p>
+        </div>
+
+        <div id="tableWrapper" class="table-wrapper">
+          <table id="studentsTable">
+            <thead>
+              <tr>
+                <th>Enrollment No.</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Branch</th>
+                <th>Semester</th>
+                <th>Section</th>
+                <th class="actions-col">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="studentsTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- Delete Confirmation Modal -->
+  <div id="deleteModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="deleteModalTitle">
+    <div class="modal-card">
+      <h3 id="deleteModalTitle">Delete Student Record</h3>
+      <p id="deleteModalText">Are you sure you want to delete this student record?</p>
+      <div class="modal-actions">
+        <button type="button" id="cancelDeleteBtn" class="btn btn-secondary">Cancel</button>
+        <button type="button" id="confirmDeleteBtn" class="btn btn-danger">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="container">
+      <p>Student Management System &bull; Node.js, Express.js, MongoDB &amp; Mongoose</p>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
